@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Prop Attacher</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="hidden">
+
+        <header>
+            <div class="header-left">
+                <span class="logo-icon">⬡</span>
+                <div>
+                    <div class="title">PROP ATTACHER</div>
+                    <div class="subtitle">Bone Placement Debug Tool</div>
+                </div>
+            </div>
+            <div class="header-btns">
+                <button id="btnMinimize" class="hdr-btn" title="Minimize — run /propattacher to restore">_</button>
+                <button id="btnClose" class="hdr-btn close" title="Close (clears session)">✕</button>
+            </div>
+        </header>
+
+        <nav class="tabs">
+            <button class="tab active" data-tab="spawn">SPAWN</button>
+            <button class="tab" data-tab="adjust">ADJUST</button>
+            <button class="tab" data-tab="attached">ATTACHED</button>
+            <button class="tab" data-tab="export">EXPORT</button>
+        </nav>
+
+        <!-- SPAWN -->
+        <section class="tab-content active" id="tab-spawn">
+            <div class="panel-label">MODEL NAME</div>
+            <div class="input-row">
+                <input id="modelInput" type="text" placeholder="e.g. w_lr_rpg" spellcheck="false" />
+                <button id="btnSpawn" class="btn-primary">SPAWN</button>
+            </div>
+            <div class="panel-label">BONE TARGET</div>
+            <div class="input-row">
+                <input id="boneSearch" type="text" placeholder="Search by name..." style="flex:2" />
+                <input id="boneNumInput" type="number" placeholder="or index…" style="flex:1" />
+                <button id="btnSetBoneNum" class="btn-ghost" style="white-space:nowrap">SET</button>
+            </div>
+            <div id="boneList" class="bone-list"></div>
+            <div class="panel-label">PRESETS</div>
+            <div id="presetList" class="preset-list"></div>
+            <div id="spawnStatus" class="status-bar"></div>
+        </section>
+
+                <!-- ADJUST -->
+        <section class="tab-content" id="tab-adjust">
+            <div class="placement-hint" id="placementHint">Spawn a prop first, then hold LMB to move / RMB to rotate.</div>
+
+            <div class="live-badge hidden" id="liveBadge">
+                <span class="dot"></span> LIVE PLACEMENT
+                <span id="axisLabel" class="axis-label">AXIS: XY</span>
+                <span id="rotLabel" class="rot-label"></span>
+            </div>
+            <div class="vec-group">
+                <div class="vec-header">
+                    <span class="vec-label">OFFSET</span>
+                    <span class="vec-unit">LMB drag · scroll=Z</span>
+                </div>
+                <div class="vec-row">
+                    <div class="vec-field">
+                        <span class="axis-tag x">X</span>
+                        <button class="nudge-btn" data-type="offset" data-axis="x" data-step="-0.01">−</button>
+                        <input class="vec-input" id="ox" type="number" step="0.001" value="0.0000" />
+                        <button class="nudge-btn" data-type="offset" data-axis="x" data-step="0.01">+</button>
+                    </div>
+                    <div class="vec-field">
+                        <span class="axis-tag y">Y</span>
+                        <button class="nudge-btn" data-type="offset" data-axis="y" data-step="-0.01">−</button>
+                        <input class="vec-input" id="oy" type="number" step="0.001" value="0.0000" />
+                        <button class="nudge-btn" data-type="offset" data-axis="y" data-step="0.01">+</button>
+                    </div>
+                    <div class="vec-field">
+                        <span class="axis-tag z">Z</span>
+                        <button class="nudge-btn" data-type="offset" data-axis="z" data-step="-0.01">−</button>
+                        <input class="vec-input" id="oz" type="number" step="0.001" value="0.0000" />
+                        <button class="nudge-btn" data-type="offset" data-axis="z" data-step="0.01">+</button>
+                    </div>
+                </div>
+                <div class="fine-row">
+                    <span class="fine-label">Step:</span>
+                    <button class="step-btn active" data-step-target="offset" data-val="0.001">0.001</button>
+                    <button class="step-btn" data-step-target="offset" data-val="0.01">0.01</button>
+                    <button class="step-btn" data-step-target="offset" data-val="0.05">0.05</button>
+                    <button class="step-btn" data-step-target="offset" data-val="0.1">0.1</button>
+                </div>
+            </div>
+
+            <div class="vec-group">
+                <div class="vec-header">
+                    <span class="vec-label">ROTATION</span>
+                    <span class="vec-unit">RMB drag</span>
+                </div>
+                <div class="vec-row">
+                    <div class="vec-field">
+                        <span class="axis-tag x">X</span>
+                        <button class="nudge-btn" data-type="rotation" data-axis="x" data-step="-5">−</button>
+                        <input class="vec-input" id="rx" type="number" step="1" value="0.00" />
+                        <button class="nudge-btn" data-type="rotation" data-axis="x" data-step="5">+</button>
+                    </div>
+                    <div class="vec-field">
+                        <span class="axis-tag y">Y</span>
+                        <button class="nudge-btn" data-type="rotation" data-axis="y" data-step="-5">−</button>
+                        <input class="vec-input" id="ry" type="number" step="1" value="0.00" />
+                        <button class="nudge-btn" data-type="rotation" data-axis="y" data-step="5">+</button>
+                    </div>
+                    <div class="vec-field">
+                        <span class="axis-tag z">Z</span>
+                        <button class="nudge-btn" data-type="rotation" data-axis="z" data-step="-5">−</button>
+                        <input class="vec-input" id="rz" type="number" step="1" value="0.00" />
+                        <button class="nudge-btn" data-type="rotation" data-axis="z" data-step="5">+</button>
+                    </div>
+                </div>
+                <div class="fine-row">
+                    <span class="fine-label">Step:</span>
+                    <button class="step-btn active" data-step-target="rotation" data-val="1">1°</button>
+                    <button class="step-btn" data-step-target="rotation" data-val="5">5°</button>
+                    <button class="step-btn" data-step-target="rotation" data-val="15">15°</button>
+                    <button class="step-btn" data-step-target="rotation" data-val="45">45°</button>
+                </div>
+            </div>
+
+            <div class="action-row">
+                <button id="btnRecalibrate" class="btn-ghost" title="Find nearest bone and suggest better placement">⟳ RECAL</button>
+                <button id="btnReset" class="btn-ghost">RESET</button>
+                <button id="btnCancel" class="btn-danger">CANCEL</button>
+                <button id="btnConfirm" class="btn-primary">CONFIRM ✓</button>
+            </div>
+
+            <!-- Recalibrate result popup -->
+            <div id="recalPopup" class="recal-popup hidden">
+                <div class="recal-title">⟳ RECALIBRATE RESULT</div>
+                <div id="recalBody" class="recal-body"></div>
+                <div id="recalActions" class="recal-actions hidden">
+                    <button id="btnRecalApply" class="btn-primary">SWITCH TO NEW BONE</button>
+                    <button id="btnRecalDismiss" class="btn-ghost">KEEP CURRENT</button>
+                </div>
+                <div id="recalSame" class="recal-same hidden">
+                    <button id="btnRecalOk" class="btn-ghost full-width">OK</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ATTACHED -->
+        <section class="tab-content" id="tab-attached">
+            <div id="attachedList" class="attached-list">
+                <div class="empty-state">No props attached yet.</div>
+            </div>
+            <div id="detachConfirmRow" class="confirm-row hidden">
+                <span class="confirm-text">⚠ Detach all props?</span>
+                <button id="btnDetachConfirm" class="btn-danger">YES</button>
+                <button id="btnDetachCancel" class="btn-ghost">NO</button>
+            </div>
+            <button id="btnDetachAll" class="btn-danger full-width">DETACH ALL</button>
+        </section>
+
+        <!-- EXPORT -->
+        <section class="tab-content" id="tab-export">
+            <div class="panel-label">FORMAT</div>
+            <div class="input-row" style="gap:6px">
+                <button id="btnExportAttach" class="btn-primary" style="flex:1">AttachEntityToEntity</button>
+                <button id="btnExportCompact" class="btn-ghost" style="flex:1">Compact {bone,pos,rot}</button>
+            </div>
+            <textarea id="exportOutput" class="export-box" readonly placeholder="Click a format button above..."></textarea>
+            <button id="btnCopy" class="btn-ghost full-width" style="margin-top:6px">COPY TO CLIPBOARD</button>
+        </section>
+
+    </div>
+    <!-- <div class="fc-hint-line"><span class="fc-key">WASD</span> Fly &nbsp; <span class="fc-key">Q/E</span> Up/Down</div>
+        <div class="fc-hint-line"><span class="fc-key">Shift</span> Fast &nbsp; <span class="fc-key">F5</span> Exit freecam</div>
+        <div class="fc-hint-line"><span class="fc-key">LMB drag axis</span> Move prop</div>
+    </div> -->
+
+    <!-- Freecam active overlay
+    <div id="freecamOverlay" class="hidden">
+        <div class="fc-row"><kbd>RMB</kbd> held = look + fly</div>
+        <div class="fc-row"><kbd>WASD</kbd> move &nbsp; <kbd>Q/E</kbd> up/down</div>
+        <div class="fc-row"><kbd>Shift</kbd> fast &nbsp; release RMB = exit</div>
+    </div> -->
+    <script src="js/app.js"></script>
+</body>
+</html>
